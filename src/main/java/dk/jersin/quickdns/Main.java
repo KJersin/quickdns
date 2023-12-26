@@ -66,9 +66,6 @@ public class Main implements Callable<Integer> {
      * @throws InterruptedException 
      */
     private HttpResponse<String> login(String name, String password) throws IOException, InterruptedException {
-        // Load configuration
-        
-        
         // Request the homepage
         // This establishes the session and resolves any redirection to the main page.
         var response = client.send(newBuilder(url)
@@ -134,7 +131,7 @@ public class Main implements Callable<Integer> {
             config.load(in);
         }
 
-        // Login an get going
+        // Login and get going
         var response = login(config.getProperty("email"), config.getProperty("password"));
         log.info("Login: " + response.statusCode());
         if (response.statusCode() == 200) {
