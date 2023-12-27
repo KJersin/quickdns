@@ -30,6 +30,7 @@ import java.net.URI;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
@@ -43,22 +44,19 @@ public class Zones {
     private static Logger log = Logger.getGlobal();
 
     private Context ctx;
+    
+    private URI baseUri;
 
     private Map<String, Zone> zones;
 
     public Zones(Context ctx, InputStream in, URI baseUri) throws IOException {
         this.ctx = ctx;
+        this.baseUri= baseUri;
         this.zones = new LinkedHashMap<>();
 
-        var doc = Jsoup.parse(in, ctx.charset().name(), baseUri.toString());
-        log.info(doc.toString());
-
-        var table = doc.getElementById("zone_table");
-        log.info(table.toString());
-
-        var rows = table.getElementsByTag("tr");
-        log.info(rows.toString());
-
+        var rows = Jsoup.parse(in, ctx.charset().name(), baseUri.toString())
+                .getElementById("zone_table")
+                .getElementsByTag("tr");
         rows.forEach((row) -> {
             if (row.hasAttr("zoneid")) {
                 var zoneElm = row.getElementsByTag("a").first();
@@ -70,12 +68,11 @@ public class Zones {
                 ));
             }
         });
-
-        int tt = 42;
     }
 
-    public Zone zoneFor(String domain) {
-
-        return null;
+    public Optional<Zone> zoneFor(String domain) {
+        if (zones.containsKey(domain))
+            return Optional.of(zones.get(domain).load(ctx, baseUri));
+        return Optional.empty();
     }
 }

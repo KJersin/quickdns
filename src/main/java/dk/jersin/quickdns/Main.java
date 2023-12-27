@@ -29,6 +29,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
 
@@ -41,7 +42,7 @@ import org.jsoup.Jsoup;
 )
 public class Main implements Callable<Integer>, Context {
 
-    private static Logger log = Logger.getGlobal();
+    private static Logger logger = Logger.getGlobal();
 
     @Parameters(index = "0", description = "What to do")
     private String cmd;
@@ -116,13 +117,13 @@ public class Main implements Callable<Integer>, Context {
 
         // Login and get going
         var response = login(config.getProperty("email"), config.getProperty("password"));
-        log.info("Login: " + response.statusCode());
+        logger.log(INFO, "Login: {0}", response.statusCode());
         if (response.statusCode() == 200) {
-            try {
-                var zones = new Zones(this, response.body(), response.uri());
+            try (var in = response.body()) {
+                var zones = new Zones(this, in, response.uri());
                 exitCode = executeCmd(zones);
             } finally {
-                log.info("Logout: " + logout());
+                logger.log(INFO, "Logout: {0}", logout());
             }
         }
         return exitCode;
@@ -134,6 +135,7 @@ public class Main implements Callable<Integer>, Context {
     }
     
     private int executeCmd(Zones zones) {
+        zones.zoneFor("jersin.dk");
         return 0;
     }
     

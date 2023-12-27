@@ -23,15 +23,19 @@
  */
 package dk.jersin.quickdns.services;
 
+import dk.jersin.quickdns.Context;
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.logging.Logger;
 
 /**
  *
  * @author kje
  */
 public class Zone {
-    //private static DateTimeFormatter format = DateTim
+    
+    private static Logger logger = Logger.getGlobal();
     
     private int id;
     
@@ -48,6 +52,11 @@ public class Zone {
         this.modified = LocalDateTime.parse(modified);
     }
 
+    protected Zone load(Context ctx, URI baseUri) {
+        logger.info(baseUri.resolve(editPath).toString());
+        return this;
+    }
+    
     @Override
     public String toString() {
         return "Zone{" + "id=" + id + ", editPath=" + editPath + ", domain=" + domain + ", modified=" + modified + '}';
