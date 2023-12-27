@@ -40,24 +40,4 @@ public class RequestBody {
         this.charset = charset;
     }
 
-    public HttpRequest.BodyPublisher ofForm(Map<String, String> data) {
-        StringBuilder body = new StringBuilder();
-        for (Object dataKey : data.keySet()) {
-            if (body.length() > 0) {
-                body.append("&");
-            }
-            body.append(encode(dataKey))
-                    .append("=")
-                    .append(encode(data.get(dataKey)));
-        }
-        return HttpRequest.BodyPublishers.ofString(body.toString());
-    }
-    
-    public Charset getCharset() {
-        return charset;
-    }
-
-    private String encode(Object obj) {
-        return URLEncoder.encode(obj.toString(), charset);
-    }
 }

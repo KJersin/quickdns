@@ -23,56 +23,81 @@
  */
 package dk.jersin.quickdns.services;
 
-import dk.jersin.quickdns.Context;
+import dk.jersin.quickdns.Connection;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import dk.jersin.quickdns.DomFunction;
 
 /**
  *
  * @author kje
  */
-public class Zones {
+public class Zones implements DomFunction<Zones> {
 
-    private static Logger log = Logger.getGlobal();
+    private static Logger logger = Logger.getGlobal();
 
-    private Context ctx;
-    
+    private Connection conn;
+
+    private Map<String, ZoneElm> zones;
+
     private URI baseUri;
 
-    private Map<String, Zone> zones;
-
-    public Zones(Context ctx, InputStream in, URI baseUri) throws IOException {
-        this.ctx = ctx;
-        this.baseUri= baseUri;
+    public Zones(Connection conn) {
         this.zones = new LinkedHashMap<>();
-
-        var rows = Jsoup.parse(in, ctx.charset().name(), baseUri.toString())
-                .getElementById("zone_table")
-                .getElementsByTag("tr");
-        rows.forEach((row) -> {
-            if (row.hasAttr("zoneid")) {
-                var zoneElm = row.getElementsByTag("a").first();
-                zones.put(zoneElm.text(), new Zone(
-                        row.attr("zoneid"),
-                        zoneElm.attr("href"),
-                        zoneElm.text(),
-                        row.child(4).text().replace(' ', 'T')
-                ));
-            }
-        });
+        this.conn = conn;
     }
 
-    public Optional<Zone> zoneFor(String domain) {
-        if (zones.containsKey(domain))
-            return Optional.of(zones.get(domain).load(ctx, baseUri));
+    @Override
+    public Zones load(Document doc) {
+        baseUri = URI.create(doc.baseUri());
+        var rows = doc.getElementById("zone_table")
+                .getElementsByTag("tr");
+
+        rows.forEach((row) -> {
+            if (row.hasAttr("zoneid")) {
+                var aElm = row.getElementsByTag("a").first();
+                var zone = new ZoneElm(
+                        aElm.attr("href"),
+                        new Zone(
+                                row.attr("zoneid"),
+                                aElm.text(),
+                                row.child(4).text().replace(' ', 'T')
+                        )
+                );
+                logger.info(() -> zone.toString());
+                zones.put(aElm.text(), zone);
+            }
+        });
+        return this;
+    }
+
+    public Optional<Zone> zoneFor(String domain) throws IOException, InterruptedException {
+        if (zones.containsKey(domain)) {
+            var zoneElm = zones.get(domain);
+            return Optional.of(conn.get(zoneElm.value, baseUri, zoneElm.editPath));
+        }
         return Optional.empty();
+    }
+
+    private static class ZoneElm {
+
+        String editPath;
+
+        Zone value;
+
+        ZoneElm(String editPath, Zone value) {
+            this.editPath = editPath;
+            this.value = value;
+        }
+
+        @Override
+        public String toString() {
+            return value.toString();
+        }
     }
 }

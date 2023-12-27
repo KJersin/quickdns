@@ -23,15 +23,10 @@
  */
 package dk.jersin.quickdns.services;
 
-import dk.jersin.quickdns.Context;
-import dk.jersin.quickdns.RequestBody;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.AfterAll;
@@ -43,60 +38,34 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author kje
  */
-public class ZonesTest {
-    
+public class ZoneTest {
+
     private static Path htmlPage;
-    
-    private static InputStream in() throws FileNotFoundException {
-        return new FileInputStream(htmlPage.toFile());
-    }
-    
-    public static Context ctx() {
-        return new Context() {
-            @Override
-            public URI mainPage() {
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-            }
 
-            @Override
-            public HttpClient client() {
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-            }
-
-            @Override
-            public RequestBody requestBody() {
-                throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
-            }
-
-            @Override
-            public Charset charset() {
-                return Charset.forName("ISO-8859-1");
-            }
-        };
+    public ZoneTest() {
     }
-    
-    public ZonesTest() {
-    }
-    
+
     @BeforeAll
     public static void setUpClass() {
         htmlPage = Paths.get("")
                 .toAbsolutePath()
                 .resolve("downloads")
-                .resolve("QuickDNS.dk - Mine zoner.html");
+                .resolve("QuickDNS.dk - Ret zone.html");
     }
-    
+
     @AfterAll
     public static void tearDownClass() {
     }
 
     /**
-     * Test of zoneFor method, of class Zones.
+     * Test of toString method, of class Zone.
      */
     @Test
-    public void testZoneFor() throws FileNotFoundException, IOException, InterruptedException {
-        var zones = new Zones(ctx(), in(), URI.create("https://example.com"));
-        
+    public void testLoad() throws FileNotFoundException, IOException {
+        var instance = new Zone("6137", "/editzone?id=6137,", "jersin.dk", "2023-12-25T19:44:12");
+        try (var in = new FileInputStream(htmlPage.toFile())) {
+            instance.load(in, ZonesTest.ctx().charset(), URI.create("https://example.com"));
+        }
     }
-    
+
 }

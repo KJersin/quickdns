@@ -30,27 +30,33 @@ package dk.jersin.dns;
 public class Record {
     private String name;
     private Integer ttl;
-    private String Type;
+    private String type;
     private Integer priority;
     private String value;
     
-    public Record(String name, String Type, String value) {
+    public Record(String name, String type, String value) {
         this.name = name;
-        this.Type = Type;
+        this.type = type;
         this.value = value;
     }
 
     public Record(String name, Integer ttl, String Type, String value) {
         this.name = name;
         this.ttl = ttl;
-        this.Type = Type;
+        this.type = Type;
         this.value = value;
     }
+    
     public Record(String name, Integer ttl, String Type, Integer priority, String value) {
         this.name = name;
         this.ttl = ttl;
-        this.Type = Type;
+        this.type = Type;
         this.priority = priority;
         this.value = value;
+    }
+
+    @Override
+    public String toString() {
+        return "Record{" + "name=" + name + ", ttl=" + ttl + ", Type=" + type + ", priority=" + priority + ", value=" + value + '}';
     }
 }

@@ -21,24 +21,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dk.jersin.dns;
+package dk.jersin.quickdns;
 
-import java.time.LocalDateTime;
+import org.jsoup.nodes.Document;
 
 /**
  *
  * @author kje
  */
-public class Zone {
-    private int id;
-    private String name;
-    private String editRef;
-    private LocalDateTime modified;
-
-    public Zone(int id, String name, String editRef, LocalDateTime modified) {
-        this.id = id;
-        this.name = name;
-        this.editRef = editRef;
-        this.modified = modified;
-    }
+public interface DomFunction<T> {
+    T load(Document doc);
 }

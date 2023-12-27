@@ -23,43 +23,55 @@
  */
 package dk.jersin.quickdns.services;
 
-import dk.jersin.quickdns.Context;
-import java.net.URI;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.logging.Logger;
+import org.jsoup.nodes.Document;
+import dk.jersin.quickdns.DomFunction;
+import org.jsoup.nodes.Element;
+import dk.jersin.dns.Record;
 
 /**
  *
  * @author kje
  */
-public class Zone {
-    
+public class Zone implements DomFunction<Zone> {
+
     private static Logger logger = Logger.getGlobal();
-    
+
     private int id;
-    
-    private String editPath;
-    
+
     private String domain;
-    
+
     private LocalDateTime modified;
 
-    public Zone(String id, String editPath, String domain, String modified) {
+    protected Zone(String id, String domain, String modified) {
         this.id = Integer.parseInt(id);
-        this.editPath = editPath;
         this.domain = domain;
         this.modified = LocalDateTime.parse(modified);
     }
-
-    protected Zone load(Context ctx, URI baseUri) {
-        logger.info(baseUri.resolve(editPath).toString());
-        return this;
-    }
     
     @Override
+    public Zone load(Document doc) {
+        doc.getElementById("zone_table").getElementsByTag("tr").forEach((row) -> {
+            if (!row.hasClass("listheader")) {
+                var rec = newRecord(row);
+                logger.info(() -> rec.toString());
+                
+            }
+        });
+        return this;
+    }
+
+    @Override
     public String toString() {
-        return "Zone{" + "id=" + id + ", editPath=" + editPath + ", domain=" + domain + ", modified=" + modified + '}';
+        return "Zone{" + "id=" + id + ", domain=" + domain + ", modified=" + modified + '}';
     }
     
+    private Record newRecord(Element row) {
+        return new Record(
+                row.child(0).text().trim(),
+                row.child(2).text().trim(),
+                row.child(4).text().trim()
+        );
+    }
 }
