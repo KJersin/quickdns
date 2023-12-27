@@ -1,1 +1,4 @@
-target
+/target
+/downloads
+/dependency-reduced-pom.xml
+/nbproject/

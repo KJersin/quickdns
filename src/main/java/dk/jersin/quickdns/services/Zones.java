@@ -23,10 +23,59 @@
  */
 package dk.jersin.quickdns.services;
 
+import dk.jersin.quickdns.Context;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.jsoup.Jsoup;
+
 /**
  *
  * @author kje
  */
 public class Zones {
-    
+
+    private static Logger log = Logger.getGlobal();
+
+    private Context ctx;
+
+    private Map<String, Zone> zones;
+
+    public Zones(Context ctx, InputStream in, URI baseUri) throws IOException {
+        this.ctx = ctx;
+        this.zones = new LinkedHashMap<>();
+
+        var doc = Jsoup.parse(in, ctx.charset().name(), baseUri.toString());
+        log.info(doc.toString());
+
+        var table = doc.getElementById("zone_table");
+        log.info(table.toString());
+
+        var rows = table.getElementsByTag("tr");
+        log.info(rows.toString());
+
+        rows.forEach((row) -> {
+            if (row.hasAttr("zoneid")) {
+                var zoneElm = row.getElementsByTag("a").first();
+                zones.put(zoneElm.text(), new Zone(
+                        row.attr("zoneid"),
+                        zoneElm.attr("href"),
+                        zoneElm.text(),
+                        row.child(4).text().replace(' ', 'T')
+                ));
+            }
+        });
+
+        int tt = 42;
+    }
+
+    public Zone zoneFor(String domain) {
+
+        return null;
+    }
 }
