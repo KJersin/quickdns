@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2023 kje.
+ * Copyright 2024 kje.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,40 +23,34 @@
  */
 package dk.jersin.dns;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import java.util.List;
+import java.util.Optional;
+
+import static java.util.Collections.emptyList;
+
 /**
  *
  * @author kje
  */
-public class Record {
-    private String name;
-    private Integer ttl;
-    private String type;
-    private Integer priority;
-    private String value;
-    
-    public Record(String name, String type, String value) {
-        this.name = name;
-        this.type = type;
-        this.value = value;
-    }
+public class Resolve {
 
-    public Record(String name, Integer ttl, String Type, String value) {
-        this.name = name;
-        this.ttl = ttl;
-        this.type = Type;
-        this.value = value;
-    }
-    
-    public Record(String name, Integer ttl, String Type, Integer priority, String value) {
-        this.name = name;
-        this.ttl = ttl;
-        this.type = Type;
-        this.priority = priority;
-        this.value = value;
-    }
+    @Expose
+    @SerializedName("Status")
+    private int status;
 
-    @Override
-    public String toString() {
-        return "Record{" + "name=" + name + ", ttl=" + ttl + ", Type=" + type + ", priority=" + priority + ", value=" + value + '}';
+    @Expose
+    @SerializedName("Answer")
+    private List<ZoneRecord> answer = emptyList();
+
+    @Expose
+    @SerializedName("Comment")
+    private String comment;
+
+    public Optional<ZoneRecord> find(ZoneRecord record) {
+        return answer.stream()
+                .filter(record::equals)
+                .findFirst();
     }
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2023 kje.
+ * Copyright 2024 kje.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,58 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dk.jersin.quickdns.services;
+package dk.jersin.quickdns;
 
-import dk.jersin.quickdns.Context;
-import dk.jersin.quickdns.RequestBody;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.jsoup.Jsoup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import dk.jersin.dns.Resolve;
 import org.junit.jupiter.api.Test;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
  *
  * @author kje
  */
-public class ZonesTest {
-    
-    private static Path htmlPage;
-    
-    public ZonesTest() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-        htmlPage = Paths.get("")
-                .toAbsolutePath()
-                .resolve("src/test/pages")
-                .resolve("QuickDNS.dk_Mine_zoner.html");
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
+public class ConnectionClientTest {
+
+    public ConnectionClientTest() {
     }
 
-    /**
-     * Test of zoneFor method, of class Zones.
-     */
     @Test
-    public void testZoneFor() throws FileNotFoundException, IOException, InterruptedException {
-        var zones = new Zones(null);
-        
-        zones.load(Jsoup.parse(htmlPage.toFile(), "ISO-8859-1"));
-        
+    public void testCharset() {
+    }
+
+    @Test
+    public void testGet_3args() throws Exception {
+    }
+
+    @Test
+    public void testGet_4args_1() throws Exception {
+    }
+
+    @Test
+    public void testGet_4args_2() throws Exception {
+    }
+
+    @Test
+    public void testGet_5args() throws Exception {
+    }
+
+    @Test
+    public void testDig() throws Exception {
+        var conn = new ConnectionClient();
+        Resolve dig = conn.dig("_acme-challenge.grinn.dk", "TXT");
         int tt = 42;
     }
-    
+
+    @Test
+    public void testClose() throws Exception {
+    }
+
 }

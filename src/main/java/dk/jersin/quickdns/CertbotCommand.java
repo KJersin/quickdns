@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2023 kje.
+ * Copyright 2024 kje.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,52 +21,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dk.jersin.quickdns.services;
+package dk.jersin.quickdns;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.jsoup.Jsoup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import dk.jersin.letsencrypt.CertbotHook;
+import dk.jersin.quickdns.services.Zones;
+import java.util.concurrent.Callable;
+import picocli.CommandLine;
+
+import static java.util.logging.Level.INFO;
+import static picocli.CommandLine.*;
+import static picocli.CommandLine.Model.*;
 
 /**
  *
  * @author kje
  */
-public class ZoneTest {
+@Command(
+        name = "certbot",
+        description
+        = "Handles the Certbot hooks by getting arguments from the environment variables.\n"
+        + "See: https://eff-certbot.readthedocs.io/en/stable/using.html#hooks\n"
+        + "NOTE: The certbot command is automatically issued if the environment variable CERTBOT_DOMAIN is set."
+)
+public class CertbotCommand implements Callable<Integer> {
 
-    private static Path htmlPage;
+    @Mixin
+    private MainContext ctx;
 
-    public ZoneTest() {
-    }
+    @Spec
+    private CommandSpec spec;
 
-    @BeforeAll
-    public static void setUpClass() {
-        htmlPage = Paths.get("")
-                .toAbsolutePath()
-                .resolve("src/test/pages")
-                .resolve("QuickDNS.dk_Ret_zone.html");
-    }
-
-    @AfterAll
-    public static void tearDownClass() {
-    }
-
-    /**
-     * Test of toString method, of class Zone.
-     */
-    @Test
-    public void testLoad() throws FileNotFoundException, IOException {
-        var instance = new Zone("6137", "jersin.dk", "2023-12-25T19:44:12");
-        instance.load(Jsoup.parse(htmlPage.toFile(), "ISO-8859-1"));
-        
-        int tt=42;
+    @Override
+    public Integer call() throws Exception {
+        // Connect, login and load the zones
+        int exitCode = 0;
+        var zones = ctx.login();
+        try {
+            exitCode = CertbotHook.fromEnvironment(zones).call();
+        } finally {
+            ctx.logout();
+        }
+        return exitCode;
     }
 
 }

@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2023 kje.
+ * Copyright 2024 kje.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,58 +21,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dk.jersin.quickdns.services;
+package dk.jersin.quickdns;
 
-import dk.jersin.quickdns.Context;
-import dk.jersin.quickdns.RequestBody;
-import java.io.FileInputStream;
+import dk.jersin.quickdns.services.Zones;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.nio.charset.Charset;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import org.jsoup.Jsoup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import static picocli.CommandLine.*;
 
 /**
  *
  * @author kje
  */
-public class ZonesTest {
-    
-    private static Path htmlPage;
-    
-    public ZonesTest() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-        htmlPage = Paths.get("")
-                .toAbsolutePath()
-                .resolve("src/test/pages")
-                .resolve("QuickDNS.dk_Mine_zoner.html");
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
-    }
+@Command(
+        mixinStandardHelpOptions = true
+)
+public class MainContext {
 
     /**
-     * Test of zoneFor method, of class Zones.
+     *
      */
-    @Test
-    public void testZoneFor() throws FileNotFoundException, IOException, InterruptedException {
-        var zones = new Zones(null);
-        
-        zones.load(Jsoup.parse(htmlPage.toFile(), "ISO-8859-1"));
-        
-        int tt = 42;
+    private Connection conn;
+
+    @Option(names = {"-u", "--url"}, description = "QuickDns root page (default: https://www.quickdns.dk)")
+    public URI uri;
+
+    @Option(names = {"-c", "--configuration"},
+            description = "Configuration containing email and password"
+    )
+    public Path configPath;
+
+    public MainContext() throws URISyntaxException {
+        conn = new Connection("ISO-8859-1");
+        uri = new URI("https://www.quickdns.dk");
+        configPath = Paths.get(System.getProperty("user.home"), ".java/.userPrefs/quick-dns.conf");
     }
-    
+
+    public Zones login() throws IOException, FileNotFoundException, InterruptedException {
+        return conn.login(new Zones(conn), uri, configPath);
+    }
+
+    public void logout() throws IOException, InterruptedException {
+        conn.logout();
+    }
 }

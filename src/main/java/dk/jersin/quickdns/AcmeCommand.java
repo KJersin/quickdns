@@ -1,7 +1,7 @@
 /*
  * The MIT License
  *
- * Copyright 2023 kje.
+ * Copyright 2024 kje.
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -21,52 +21,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dk.jersin.quickdns.services;
+package dk.jersin.quickdns;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.jsoup.Jsoup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
-import static org.junit.jupiter.api.Assertions.*;
+import dk.jersin.letsencrypt.CertbotHook;
+import java.util.concurrent.Callable;
+import picocli.CommandLine;
+
+import static picocli.CommandLine.*;
+import static picocli.CommandLine.Model.*;
 
 /**
  *
  * @author kje
  */
-public class ZoneTest {
+@Command(
+        name = "acme",
+        description = "Inserts or removes _acme-challenge record(s)",
+        subcommands = {
+            AcmeCommand.InsertCommand.class
+        }
+)
+public class AcmeCommand {
 
-    private static Path htmlPage;
+    @Option(names = {"-d", "--domain"}, required = true)
+    String domain;
 
-    public ZoneTest() {
+    @Mixin
+    private MainContext ctx;
+
+    @Spec
+    private CommandSpec spec;
+
+    @Command(
+            name = "insert",
+            description = "Insert a \"_acme-challenge\" TXT record."
+    )
+    public static class InsertCommand implements Runnable {
+
+        @Parameters(arity = "1", description = "The challenge value to be inserted")
+        String challengeValue;
+
+        @Override
+        public void run() {
+        }
     }
-
-    @BeforeAll
-    public static void setUpClass() {
-        htmlPage = Paths.get("")
-                .toAbsolutePath()
-                .resolve("src/test/pages")
-                .resolve("QuickDNS.dk_Ret_zone.html");
-    }
-
-    @AfterAll
-    public static void tearDownClass() {
-    }
-
-    /**
-     * Test of toString method, of class Zone.
-     */
-    @Test
-    public void testLoad() throws FileNotFoundException, IOException {
-        var instance = new Zone("6137", "jersin.dk", "2023-12-25T19:44:12");
-        instance.load(Jsoup.parse(htmlPage.toFile(), "ISO-8859-1"));
-        
-        int tt=42;
-    }
-
 }

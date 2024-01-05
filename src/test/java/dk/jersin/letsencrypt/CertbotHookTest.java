@@ -21,22 +21,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package dk.jersin.quickdns.services;
+package dk.jersin.letsencrypt;
 
-import dk.jersin.quickdns.Context;
-import dk.jersin.quickdns.RequestBody;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.nio.charset.Charset;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import org.jsoup.Jsoup;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
+import dk.jersin.dns.ZoneRecord;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,35 +31,32 @@ import static org.junit.jupiter.api.Assertions.*;
  *
  * @author kje
  */
-public class ZonesTest {
-    
-    private static Path htmlPage;
-    
-    public ZonesTest() {
-    }
-    
-    @BeforeAll
-    public static void setUpClass() {
-        htmlPage = Paths.get("")
-                .toAbsolutePath()
-                .resolve("src/test/pages")
-                .resolve("QuickDNS.dk_Mine_zoner.html");
-    }
-    
-    @AfterAll
-    public static void tearDownClass() {
+public class CertbotHookTest {
+
+    public CertbotHookTest() {
     }
 
-    /**
-     * Test of zoneFor method, of class Zones.
-     */
     @Test
-    public void testZoneFor() throws FileNotFoundException, IOException, InterruptedException {
-        var zones = new Zones(null);
-        
-        zones.load(Jsoup.parse(htmlPage.toFile(), "ISO-8859-1"));
-        
-        int tt = 42;
+    public void testFromEnvironment() {
     }
-    
+
+    @Test
+    public void testCall() throws Exception {
+    }
+
+    public void testWaitForDnsRecord() throws Exception {
+        // https://dns.google/resolve?name=_acme-challenge.grinn.dk.&type=TXT
+        
+        var rec = new ZoneRecord(
+                "_acme-challenge",
+                300, "TXT", "IYLMBsNjUPD2Tmd6QMoQwWA_Bj4UH_LN3hjdz9bKjQY"
+        );
+        var hook = new CertbotHook(null, "grinn.dk", rec.value());
+        hook.waitForDnsRecord(rec);
+    }
+
+    @Test
+    public void testToString() {
+    }
+
 }

@@ -27,49 +27,57 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import static java.net.http.HttpRequest.newBuilder;
 import java.net.http.HttpResponse;
-import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
-import static java.net.http.HttpResponse.BodyHandlers.ofString;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Properties;
-import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
 import org.jsoup.Jsoup;
+
+import static java.net.http.HttpClient.Redirect.NORMAL;
+import static java.net.http.HttpRequest.newBuilder;
+import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
+import static java.net.http.HttpResponse.BodyHandlers.ofString;
+import static java.util.logging.Level.INFO;
 
 /**
  *
  * @author kje
  */
-public class Connection {
+public class Connection extends ConnectionClient {
 
     private static Logger logger = Logger.getGlobal();
 
     private Properties config;
 
-    private HttpClient client;
-
     private URI mainPage;
 
-    private Charset charset;
-
-    public Connection() {
-        client = HttpClient.newBuilder()
+    public Connection(String charset) {
+        super(HttpClient.newBuilder()
                 .cookieHandler(new CookieManager())
-                .version(HttpClient.Version.HTTP_2)
-                .followRedirects(HttpClient.Redirect.NORMAL)
-                .build();
+                .followRedirects(NORMAL)
+                .build(),
+                Charset.forName(charset)
+        );
     }
 
-    public <T> T login(DomFunction<T> domFunc, URI uri, Path configPath, String charset) throws FileNotFoundException, IOException, InterruptedException {
-        this.charset = Charset.forName(charset);
+    public String sessionid() {
+        return ((CookieManager) client.cookieHandler().get()).getCookieStore().getCookies().stream()
+                .filter((cookie) -> cookie.getName().equals("sessionid"))
+                .findFirst().get().getValue();
+    }
+
+    public Optional<CookieHandler> cookieHandler() {
+        return client.cookieHandler();
+    }
+
+    public <T> T login(DomFunction<T> domFunc, URI uri, Path configPath) throws FileNotFoundException, IOException, InterruptedException {
         this.config = new Properties();
         try (var in = new FileInputStream(configPath.toFile())) {
             config.load(in);
@@ -77,26 +85,13 @@ public class Connection {
 
         // Login and get going
         var response = doLogin(uri, config.getProperty("email"), config.getProperty("password"));
-        logger.log(INFO, "Login: {0}", response.statusCode());
-        if (response.statusCode() == 200) {
-            try (var in = response.body()) {
-                return domFunc.load(Jsoup.parse(in, this.charset.name(), response.uri().toString()));
-            }
-        } else {
-            return null;
+        try (var in = checkedBody(response)) {
+            return domFunc.load(Jsoup.parse(in, charset.name(), response.uri().toString()));
         }
     }
 
-    public <T> T get(DomFunction<T> domFunc, URI baseUri, String href) throws IOException, InterruptedException {
-        logger.info(() -> baseUri.resolve(href).toString());
-        var response = client.send(newBuilder(baseUri.resolve(href))
-                .GET()
-                .build(), ofInputStream()
-        );
-        try (var in = response.body()) {
-            return domFunc.load(Jsoup.parse(in, charset.name(), baseUri.toString()));
-        }
-
+    public void get(String href, String referer) throws IOException, InterruptedException {
+        get(mainPage, href, referer);
     }
 
     /**
@@ -107,11 +102,14 @@ public class Connection {
      * @throws InterruptedException
      */
     public int logout() throws IOException, InterruptedException {
-        return client.send(
-                newBuilder(mainPage.resolve("logout"))
-                        .GET().build(),
-                ofString()
+        return client.send(newBuilder(mainPage.resolve("logout"))
+                .GET()
+                .build(), ofString()
         ).statusCode();
+    }
+
+    public HttpClient client() {
+        return client;
     }
 
     /**
@@ -130,32 +128,18 @@ public class Connection {
                 .GET()
                 .build(), ofString(charset)
         );
+        checkedBody(response);
         mainPage = response.uri();
 
         // The actual Login
-        return client.send(newBuilder(mainPage.resolve("login"))
+        var loginUri = mainPage.resolve("login");
+        logger.info(() -> loginUri.toString());
+        return client.send(newBuilder(loginUri)
                 .POST(ofForm(Map.of(
                         "email", name,
                         "password", password
-                ))).build(), ofInputStream()
+                ), charset))
+                .build(), ofInputStream()
         );
     }
-
-    private HttpRequest.BodyPublisher ofForm(Map<String, String> data) {
-        StringBuilder body = new StringBuilder();
-        for (Object dataKey : data.keySet()) {
-            if (body.length() > 0) {
-                body.append("&");
-            }
-            body.append(encode(dataKey))
-                    .append("=")
-                    .append(encode(data.get(dataKey)));
-        }
-        return HttpRequest.BodyPublishers.ofString(body.toString());
-    }
-
-    private String encode(Object obj) {
-        return URLEncoder.encode(obj.toString(), charset);
-    }
-
 }

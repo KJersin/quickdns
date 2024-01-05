@@ -76,12 +76,16 @@ public class Zones implements DomFunction<Zones> {
         return this;
     }
 
-    public Optional<Zone> zoneFor(String domain) throws IOException, InterruptedException {
+    public Zone zoneFor(String domain) throws IOException, InterruptedException {
         if (zones.containsKey(domain)) {
             var zoneElm = zones.get(domain);
-            return Optional.of(conn.get(zoneElm.value, baseUri, zoneElm.editPath));
+            return conn.get(zoneElm.value, baseUri, zoneElm.editPath, "/zones");
         }
-        return Optional.empty();
+        return null;
+    }
+    
+    public Connection conn() {
+        return conn;
     }
 
     private static class ZoneElm {
