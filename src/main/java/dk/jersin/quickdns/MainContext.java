@@ -65,7 +65,8 @@ public class MainContext {
             description
             = "Configuration containing Quickdns login information\n"
             + "  Default: ~/" + CONF_REL_TO_USER_HOME + "\n"
-            + "Note: File is readable only by the user running the application."
+            + "Note: To change (or view) the configuration use the command:\n"
+                    + "  quickdns configure"
     )
     private Path configPath;
 

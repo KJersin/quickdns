@@ -23,10 +23,62 @@
  */
 package dk.jersin.quickdns;
 
+import dk.jersin.quickdns.services.Zones;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+
+import static picocli.CommandLine.*;
+import static picocli.CommandLine.Model.CommandSpec;
+
 /**
  *
  * @author kje
  */
-public class RecordsCommand {
-    
+@Command(
+        name = "records",
+        description = "List records for one or more domains"
+)
+public class RecordsCommand implements Callable<Integer> {
+
+    @Parameters(
+            arity = "1..*",
+            description = "Domain name(s) to query for records."
+    )
+    private List<String> domains;
+
+    @Mixin
+    private MainContext ctx;
+
+    @Spec
+    private CommandSpec spec;
+
+    @Override
+    public Integer call() throws Exception {
+        var zones = ctx.login();
+        try {
+            show(spec.commandLine().getOut(), zones);
+        } finally {
+            ctx.logout();
+        }
+
+        return 0;
+    }
+
+    private void show(PrintWriter out, Zones zones) throws IOException, InterruptedException {
+        var sep = "";
+        for (var domain : domains) {
+            var zone = zones.zoneFor(domain);
+            out.printf("%s%s:%n", sep, domain);
+            zone.records().stream()
+                    .filter((rec) -> !"Type".equals(rec.type()))
+                    .forEach((rec) -> {
+                        out.printf("  %s%n", rec.toString());
+                    });
+            sep = "\n";
+        }
+    }
 }

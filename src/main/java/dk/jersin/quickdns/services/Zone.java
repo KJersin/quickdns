@@ -49,6 +49,8 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
+import static java.util.Collections.unmodifiableList;
+
 /*
 Jeg er ved at automatiserer processen med at få et letsencrypt (certbot) certifikat via DNS autorasation. Men jeg får en 500 intern serverfejl når jeg forsøger at gemme min "_acme-challenge" record.
 Bemærk: Jeg forsøger efter bedste evne at simulerer serverkaldene som de udføres i zones.js fra min egen client. Og "initial" og "edit" (row=-1) går godt, mens "save=1" fejler.
@@ -91,6 +93,10 @@ public class Zone implements DomFunction<Zone> {
     
     public LocalDateTime modified() {
         return modified;
+    }
+    
+    public List<ZoneRecord> records() {
+        return unmodifiableList(records);
     }
 
     @Override

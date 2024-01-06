@@ -32,10 +32,8 @@ import java.util.logging.Logger;
 import org.jsoup.nodes.Document;
 import dk.jersin.quickdns.DomFunction;
 import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
-import static java.util.Collections.unmodifiableMap;
-import static java.util.stream.Collectors.toMap;
-import static java.util.Map.Entry;
 
 /**
  *
@@ -107,13 +105,15 @@ public class Zones implements DomFunction<Zones> {
      * @return
      * @throws IOException
      * @throws InterruptedException
+     * @throws NoSuchElementException
      */
     public Zone zoneFor(String domain) throws IOException, InterruptedException {
         if (elements.containsKey(domain)) {
             var zoneElm = elements.get(domain);
             return conn.get(zoneElm.value, baseUri, zoneElm.editPath, "/zones");
+        } else {
+            throw new NoSuchElementException(domain);
         }
-        return null;
     }
 
     public Connection conn() {
