@@ -24,11 +24,8 @@
 package dk.jersin.quickdns;
 
 import dk.jersin.letsencrypt.CertbotHook;
-import dk.jersin.quickdns.services.Zones;
 import java.util.concurrent.Callable;
-import picocli.CommandLine;
 
-import static java.util.logging.Level.INFO;
 import static picocli.CommandLine.*;
 import static picocli.CommandLine.Model.*;
 

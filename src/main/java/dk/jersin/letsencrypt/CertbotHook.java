@@ -24,27 +24,20 @@
 package dk.jersin.letsencrypt;
 
 import dk.jersin.dns.ZoneRecord;
-import dk.jersin.quickdns.Connection;
 import dk.jersin.quickdns.ConnectionClient;
 import dk.jersin.quickdns.services.Zone;
 import dk.jersin.quickdns.services.Zones;
 import java.io.IOException;
-import java.net.CookieManager;
 import java.net.URISyntaxException;
 import java.net.http.HttpClient;
-import java.nio.charset.Charset;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
+
 import java.util.Arrays;
-import java.util.Hashtable;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
-import static java.util.logging.Level.SEVERE;
 import java.util.logging.Logger;
-import javax.naming.NamingException;
-import javax.naming.directory.DirContext;
-import javax.naming.directory.InitialDirContext;
 
 import static java.lang.Thread.sleep;
 import static java.lang.System.err;

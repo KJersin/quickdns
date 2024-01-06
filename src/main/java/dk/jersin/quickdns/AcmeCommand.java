@@ -24,12 +24,9 @@
 package dk.jersin.quickdns;
 
 import dk.jersin.dns.ZoneRecord;
-import dk.jersin.letsencrypt.CertbotHook;
 import dk.jersin.quickdns.services.Zone;
 import java.io.PrintWriter;
-import java.util.List;
 import java.util.concurrent.Callable;
-import picocli.CommandLine;
 
 import static dk.jersin.letsencrypt.CertbotHook.ACME_CHALLENGE;
 import static dk.jersin.letsencrypt.CertbotHook.waitForDnsRecord;

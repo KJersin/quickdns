@@ -23,7 +23,6 @@
  */
 package dk.jersin.quickdns;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +32,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 import java.nio.charset.Charset;
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
@@ -44,7 +42,6 @@ import static java.net.http.HttpClient.Redirect.NORMAL;
 import static java.net.http.HttpRequest.newBuilder;
 import static java.net.http.HttpResponse.BodyHandlers.ofInputStream;
 import static java.net.http.HttpResponse.BodyHandlers.ofString;
-import static java.util.logging.Level.INFO;
 
 /**
  *
