@@ -49,6 +49,7 @@ import java.util.logging.Level;
 import java.util.regex.Pattern;
 import javax.net.ssl.HttpsURLConnection;
 
+import static dk.jersin.letsencrypt.CertbotHook.ACME_CHALLENGE;
 import static java.util.Collections.unmodifiableList;
 
 /*
@@ -90,11 +91,11 @@ public class Zone implements DomFunction<Zone> {
     public String domain() {
         return domain;
     }
-    
+
     public LocalDateTime modified() {
         return modified;
     }
-    
+
     public List<ZoneRecord> records() {
         return unmodifiableList(records);
     }
@@ -167,6 +168,13 @@ public class Zone implements DomFunction<Zone> {
                 }
             }
             return deleted;
+        }
+
+        public ZoneRecord create(String validation) throws IOException, InterruptedException {
+            return create(new ZoneRecord(
+                    ACME_CHALLENGE,
+                    300, "TXT", validation
+            ));
         }
 
         public ZoneRecord create(ZoneRecord rec) throws IOException, InterruptedException {

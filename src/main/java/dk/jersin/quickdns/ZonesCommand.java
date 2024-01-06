@@ -23,8 +23,6 @@
  */
 package dk.jersin.quickdns;
 
-import dk.jersin.letsencrypt.CertbotHook;
-import dk.jersin.quickdns.services.Zones;
 import java.io.PrintWriter;
 import java.time.LocalDateTime;
 import java.util.Map;

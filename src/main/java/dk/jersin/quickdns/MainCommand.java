@@ -36,7 +36,7 @@ public class MainCommand implements Callable<Integer> {
         System.setProperty("java.util.logging.config.file", path);
         logger = Logger.getGlobal();
 
-        // Assume larger console
+        // Assume wide console. So use whatever space is available
         System.setProperty("picocli.usage.width", "AUTO");
     }
     

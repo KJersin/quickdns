@@ -26,9 +26,7 @@ package dk.jersin.quickdns;
 import dk.jersin.quickdns.services.Zones;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 
 import static picocli.CommandLine.*;

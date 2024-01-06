@@ -23,10 +23,16 @@
  */
 package dk.jersin.quickdns;
 
+import dk.jersin.dns.ZoneRecord;
 import dk.jersin.letsencrypt.CertbotHook;
+import dk.jersin.quickdns.services.Zone;
+import java.io.PrintWriter;
+import java.util.List;
 import java.util.concurrent.Callable;
 import picocli.CommandLine;
 
+import static dk.jersin.letsencrypt.CertbotHook.ACME_CHALLENGE;
+import static dk.jersin.letsencrypt.CertbotHook.waitForDnsRecord;
 import static picocli.CommandLine.*;
 import static picocli.CommandLine.Model.*;
 
@@ -36,15 +42,41 @@ import static picocli.CommandLine.Model.*;
  */
 @Command(
         name = "acme",
-        description = "Inserts or removes _acme-challenge record(s)",
-        subcommands = {
-            AcmeCommand.InsertCommand.class
-        }
+        description
+        = "Inserts, removes or lists _acme-challenge record(s)\n"
+        + "NOTE: If both --insert and --clear are specified then --clear is excuted before --insert\n"
+        + "      If neither --insert nor --clear is specified the current (if any) _acme-challenge record(s) are listed"
 )
-public class AcmeCommand {
+public class AcmeCommand implements Callable<Integer> {
 
-    @Option(names = {"-d", "--domain"}, required = true)
-    String domain;
+    @Option(names = {"-i", "--insert"},
+            description = "Insert an _acme-challenge TXT record"
+    )
+    private String validation;
+
+    @Option(names = {"-r", "--clear"},
+            description = "Removes all existing _acme-challenge TXT record(s)"
+    )
+    private boolean clear;
+
+    @Option(names = {"-w", "--wait"},
+            description
+            = "Wait for the inserted _acme-challenge record to show up on https://dns.google/resolve\n"
+            + "A maximum waittime of 147 seconds is inforced. In which case the program will exit with code 147\n"
+            + "NOTE: Only valid in combination with --insert"
+    )
+    private boolean wait;
+
+    @Option(names = {"-l", "--list"},
+            description = "List _acme-challenge TXT record(s)"
+    )
+    private boolean list;
+
+    @Parameters(
+            arity = "1",
+            description = "Domain of the records"
+    )
+    private String domain;
 
     @Mixin
     private MainContext ctx;
@@ -52,17 +84,49 @@ public class AcmeCommand {
     @Spec
     private CommandSpec spec;
 
-    @Command(
-            name = "insert",
-            description = "Insert a \"_acme-challenge\" TXT record."
-    )
-    public static class InsertCommand implements Runnable {
+    @Override
+    public Integer call() throws Exception {
+        int exitCode = 0;
+        var zones = ctx.login();
+        try {
+            // Clear challenges?
+            if (clear) {
+                var zone = zones.zoneFor(domain);
+                try (var records = zone.beginEdit(zones.conn())) {
+                    records.deleteByName(ACME_CHALLENGE);
+                    records.commit();
+                }
+            }
 
-        @Parameters(arity = "1", description = "The challenge value to be inserted")
-        String challengeValue;
+            // Insert challenge?
+            if (validation != null) {
+                ZoneRecord rec;
+                var zone = zones.zoneFor(domain);
+                try (var records = zone.beginEdit(zones.conn())) {
+                    rec = records.create(validation);
+                    records.commit();
+                }
+                if (wait) {
+                    exitCode = waitForDnsRecord(domain, rec) ? exitCode : 147;
+                }
+            }
 
-        @Override
-        public void run() {
+            // List challenge
+            if ((!clear && validation == null) || list) {
+                show(spec.commandLine().getOut(), zones.zoneFor(domain));
+            }
+        } finally {
+            ctx.logout();
         }
+
+        return exitCode;
+    }
+
+    private void show(PrintWriter out, Zone zone) {
+        zone.records().stream()
+                .filter((rec) -> ACME_CHALLENGE.equals(rec.name()))
+                .forEach((rec) -> {
+                    out.printf("%s%n", rec.toString());
+                });
     }
 }

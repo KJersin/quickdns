@@ -66,7 +66,7 @@ public class CertbotHook implements Callable<Integer> {
     private List<String> allDomains;
     private Optional<String> authOutput;
 
-    public static String ACME_CHALLENGE = "_acme-challenge";
+    public static final String ACME_CHALLENGE = "_acme-challenge";
 
     public CertbotHook(Zones zones, String domain, String validation) {
         this(zones, domain, validation, "", "0", domain, null);
@@ -151,10 +151,14 @@ public class CertbotHook implements Callable<Integer> {
     }
 
     public boolean waitForDnsRecord(ZoneRecord rec) throws URISyntaxException, IOException, InterruptedException {
+        return waitForDnsRecord(domain, rec);
+    }
+    
+    public static boolean waitForDnsRecord(String domain, ZoneRecord rec) throws URISyntaxException, IOException, InterruptedException {
         try (var conn = new ConnectionClient(
                 HttpClient.newBuilder().build(), UTF_8
         )) {
-            for (int n = 0; n < 14; n++) {
+            for (int n = 0; n < 21; n++) {
                 if (conn.dig(rec.name() + "." + domain, rec.type())
                         .find(rec).isPresent()) {
                     return true;

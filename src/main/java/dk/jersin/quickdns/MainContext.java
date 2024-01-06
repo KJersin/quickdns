@@ -27,8 +27,6 @@ import dk.jersin.quickdns.services.Zones;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Properties;
@@ -45,9 +43,7 @@ import static picocli.CommandLine.*;
 public class MainContext {
 
     public static final String PREF_CONFIG_PATH = "ConfigPath";
-
     public static final String WWW_QUICKDNS_DK = "https://www.quickdns.dk";
-
     public static final String CONF_REL_TO_USER_HOME = ".java/.userPrefs/quickdns.conf";
 
     /**
@@ -57,16 +53,16 @@ public class MainContext {
 
     @Option(names = {"-u", "--url"},
             description = "Root page\n"
-                    + "  Default: " + WWW_QUICKDNS_DK
+            + "  Default: " + WWW_QUICKDNS_DK
     )
     public String url;
 
     @Option(names = {"-c", "--configuration"},
             description
-            = "Configuration containing Quickdns login information\n"
+            = "Configuration containing Quickdns login information and default url\n"
             + "  Default: ~/" + CONF_REL_TO_USER_HOME + "\n"
             + "Note: To change (or view) the configuration use the command:\n"
-                    + "  quickdns configure"
+            + "  quickdns configure"
     )
     private Path configPath;
 
@@ -125,7 +121,12 @@ public class MainContext {
 
     public void logout() throws IOException, InterruptedException {
         if (conn != null) {
-            conn.logout();
+            synchronized (this) {
+                if (conn != null) {
+                    conn.logout();
+                    conn = null;
+                }
+            }
         }
     }
 }
