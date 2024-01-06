@@ -19,6 +19,8 @@ import picocli.CommandLine.Spec;
         description = "Edit Quickdns records",
         subcommands = {
             AcmeCommand.class,
+            ZonesCommand.class,
+            RecordsCommand.class,
             ConfigureCommand.class,
             CertbotCommand.class
         }
@@ -72,7 +74,6 @@ public class MainCommand implements Callable<Integer> {
             spec.commandLine().usage(err);
 
             var configureCmd = ((ConfigureCommand) spec.commandLine().getSubcommands().get("configure").getCommand());
-            configureCmd.init();
             configureCmd.show(err);
             exitCode = 2;
         }

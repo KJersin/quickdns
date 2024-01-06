@@ -88,6 +88,10 @@ public class Zone implements DomFunction<Zone> {
     public String domain() {
         return domain;
     }
+    
+    public LocalDateTime modified() {
+        return modified;
+    }
 
     @Override
     public Zone load(Document doc) {

@@ -23,46 +23,10 @@
  */
 package dk.jersin.quickdns;
 
-import dk.jersin.letsencrypt.CertbotHook;
-import dk.jersin.quickdns.services.Zones;
-import java.util.concurrent.Callable;
-import picocli.CommandLine;
-
-import static java.util.logging.Level.INFO;
-import static picocli.CommandLine.*;
-import static picocli.CommandLine.Model.*;
-
 /**
  *
  * @author kje
  */
-@Command(
-        name = "certbot",
-        description
-        = "Handles the Certbot authentication hooks by using arguments from the CERTBOT_* environment variables.\n"
-        + "See: https://eff-certbot.readthedocs.io/en/stable/using.html#hooks \n"
-        + "Also: Please use the bash script quickdns-certbot-auth to avoid running as root."
-)
-public class CertbotCommand implements Callable<Integer> {
-
-    @Mixin
-    private MainContext ctx;
-
-    @Spec
-    private CommandSpec spec;
-
-    @Override
-    public Integer call() throws Exception {
-        // Connect, login and load the zones
-        int exitCode = 0;
-        var zones = ctx.login();
-        try {
-            // Execute the hook
-            exitCode = CertbotHook.fromEnvironment(zones).call();
-        } finally {
-            ctx.logout();
-        }
-        return exitCode;
-    }
-
+public class RecordsCommand {
+    
 }

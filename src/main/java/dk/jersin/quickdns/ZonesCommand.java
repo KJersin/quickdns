@@ -25,25 +25,23 @@ package dk.jersin.quickdns;
 
 import dk.jersin.letsencrypt.CertbotHook;
 import dk.jersin.quickdns.services.Zones;
+import java.io.PrintWriter;
+import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.concurrent.Callable;
-import picocli.CommandLine;
 
-import static java.util.logging.Level.INFO;
 import static picocli.CommandLine.*;
-import static picocli.CommandLine.Model.*;
+import static picocli.CommandLine.Model.CommandSpec;
 
 /**
  *
  * @author kje
  */
 @Command(
-        name = "certbot",
-        description
-        = "Handles the Certbot authentication hooks by using arguments from the CERTBOT_* environment variables.\n"
-        + "See: https://eff-certbot.readthedocs.io/en/stable/using.html#hooks \n"
-        + "Also: Please use the bash script quickdns-certbot-auth to avoid running as root."
+        name = "zones",
+        description = "List all available Zones"
 )
-public class CertbotCommand implements Callable<Integer> {
+public class ZonesCommand implements Callable<Integer> {
 
     @Mixin
     private MainContext ctx;
@@ -53,16 +51,23 @@ public class CertbotCommand implements Callable<Integer> {
 
     @Override
     public Integer call() throws Exception {
-        // Connect, login and load the zones
-        int exitCode = 0;
         var zones = ctx.login();
         try {
-            // Execute the hook
-            exitCode = CertbotHook.fromEnvironment(zones).call();
+            show(spec.commandLine().getOut(), zones.overview());
         } finally {
             ctx.logout();
         }
-        return exitCode;
+        
+        return 0;
+    }
+    
+    public void show(PrintWriter out, Map<String, LocalDateTime> zones) {
+        out.printf("%-20s %s%n", "Zone(domain)", "Modified");
+        out.println("-".repeat(20+18));
+        zones.entrySet().stream()
+                .forEach((entry) -> {
+                    out.printf("%-20s %tD %tT%n", entry.getKey(), entry.getValue(), entry.getValue());
+                });
     }
 
 }

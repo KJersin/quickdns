@@ -24,6 +24,7 @@
 package dk.jersin.quickdns;
 
 import java.io.*;
+import java.nio.file.Path;
 import java.util.Properties;
 import java.util.concurrent.Callable;
 
@@ -44,8 +45,7 @@ import static picocli.CommandLine.Command;
         name = "configure",
         description
         = "Sets the default configuration location and optional the Quickdns login and url arguments:\n"
-        + "  Values set are automatically used when quickdns is run without any (or a subset) of the configuration arguments.",
-        showDefaultValues = true
+        + "  Values set are automatically used when quickdns is run without any (or a subset) of the configuration arguments."
 )
 public class ConfigureCommand implements Callable<Integer> {
 
@@ -71,28 +71,11 @@ public class ConfigureCommand implements Callable<Integer> {
     @Spec
     private CommandSpec spec;
 
-    public void init() throws IOException {
-        // Get the configuration path as given by user input (or use default if none given)
-        // and store as default in our application preferences.
-        var configPath = ctx.configPath();
-        ctx.prefs().put(PREF_CONFIG_PATH, configPath.toString());
-
-        // Make sure that the configuration file exists
-        if (!configPath.toFile().exists()) {
-            createDirectories(configPath.getParent());
-            configPath.toFile().createNewFile();
-
-            // ... and is only readable by the user running the Quickdns application
-            // chmod u=rw,go=
-            setPosixFilePermissions(configPath, of(OWNER_READ, OWNER_WRITE));
-        }
-    }
-
     @Override
     public Integer call() throws Exception {
         // Load the current configuration
         var config = new Properties();
-        try (var in = new FileInputStream(ctx.configPath().toFile())) {
+        try (var in = new FileInputStream(init().toFile())) {
             config.load(in);
         }
 
@@ -116,12 +99,18 @@ public class ConfigureCommand implements Callable<Integer> {
         // Show the configuration
         show(spec.commandLine().getOut());
 
+        if (check) {
+            spec.commandLine().getOut()
+                    .printf("%nChecking configuration by running:%n  quickdns zones%n");
+            spec.commandLine().getParent().getSubcommands().get("zones").execute();
+        }
+
         return 0;
     }
 
     public void show(PrintWriter out) throws FileNotFoundException, IOException {
         var config = new Properties();
-        try (var in = new FileInputStream(ctx.configPath().toFile())) {
+        try (var in = new FileInputStream(init().toFile())) {
             config.load(in);
             out.printf("Configuration (%s):\n", ctx.configPath());
             out.printf("  email   : %s\n", config.getProperty("email", "<not-set>"));
@@ -142,5 +131,23 @@ public class ConfigureCommand implements Callable<Integer> {
             }
             out.println(hint);
         }
+    }
+
+    private Path init() throws IOException {
+        // Get the configuration path as given by user input (or use default if none given)
+        // and store as default in our application preferences.
+        var configPath = ctx.configPath();
+        ctx.prefs().put(PREF_CONFIG_PATH, configPath.toString());
+
+        // Make sure that the configuration file exists
+        if (!configPath.toFile().exists()) {
+            createDirectories(configPath.getParent());
+            configPath.toFile().createNewFile();
+
+            // ... and is only readable by the user running the Quickdns application
+            // chmod u=rw,go=
+            setPosixFilePermissions(configPath, of(OWNER_READ, OWNER_WRITE));
+        }
+        return configPath;
     }
 }
