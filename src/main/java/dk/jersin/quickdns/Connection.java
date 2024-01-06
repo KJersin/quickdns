@@ -77,14 +77,9 @@ public class Connection extends ConnectionClient {
         return client.cookieHandler();
     }
 
-    public <T> T login(DomFunction<T> domFunc, URI uri, Path configPath) throws FileNotFoundException, IOException, InterruptedException {
-        this.config = new Properties();
-        try (var in = new FileInputStream(configPath.toFile())) {
-            config.load(in);
-        }
-
+    public <T> T login(DomFunction<T> domFunc, Properties config) throws FileNotFoundException, IOException, InterruptedException {
         // Login and get going
-        var response = doLogin(uri, config.getProperty("email"), config.getProperty("password"));
+        var response = doLogin(URI.create(config.getProperty("url")), config.getProperty("email"), config.getProperty("password"));
         try (var in = checkedBody(response)) {
             return domFunc.load(Jsoup.parse(in, charset.name(), response.uri().toString()));
         }
@@ -133,7 +128,6 @@ public class Connection extends ConnectionClient {
 
         // The actual Login
         var loginUri = mainPage.resolve("login");
-        logger.info(() -> loginUri.toString());
         return client.send(newBuilder(loginUri)
                 .POST(ofForm(Map.of(
                         "email", name,

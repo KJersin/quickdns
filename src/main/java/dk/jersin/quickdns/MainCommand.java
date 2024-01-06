@@ -3,53 +3,50 @@
  */
 package dk.jersin.quickdns;
 
-import dk.jersin.letsencrypt.CertbotHook;
-import dk.jersin.quickdns.services.Zones;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import picocli.CommandLine;
-import picocli.CommandLine.Option;
-
-import static java.util.logging.Level.INFO;
-import static picocli.CommandLine.Command;
-import static picocli.CommandLine.Spec;
-import static picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Command;
+import picocli.CommandLine.Model.CommandSpec;
+import picocli.CommandLine.Spec;
 
 /**
  *
  * @author kje
  */
 @Command(
-        name = "quickdns", mixinStandardHelpOptions = true, version = "0.1",
+        name = "quickdns", mixinStandardHelpOptions = true, version = "1.0",
         description = "Edit Quickdns records",
         subcommands = {
             AcmeCommand.class,
+            ConfigureCommand.class,
             CertbotCommand.class
         }
 )
 public class MainCommand implements Callable<Integer> {
 
-    private static Logger logger = Logger.getGlobal();
+    private static Logger logger;
 
     static {
-        // must set before the Logger
-        // loads logging.properties from the classpath
+        // Loads logging.properties from the classpath
         String path = MainCommand.class
                 .getClassLoader().getResource("logging.properties").getFile();
         System.setProperty("java.util.logging.config.file", path);
+        logger = Logger.getGlobal();
 
-        //
-        java.security.Security.setProperty("networkaddress.cache.ttl", "0");
-
-        System.setProperty("picocli.usage.width", Integer.toString(120));
+        // Assume larger console
+        System.setProperty("picocli.usage.width", "AUTO");
+    }
+    
+    /**
+     * Program entry.
+     * Program flow is handed of to the Picocli framework.
+     *
+     * @param args
+     * @throws Exception
+     */
+    public static void main(String[] args) throws Exception {
+        System.exit(new CommandLine(new MainCommand()).execute(args));
     }
 
     @Spec
@@ -58,15 +55,6 @@ public class MainCommand implements Callable<Integer> {
     @CommandLine.Mixin
     private MainContext ctx;
 
-    /**
-     * Program entry.
-     *
-     * @param args
-     * @throws Exception
-     */
-    public static void main(String[] args) throws Exception {
-        System.exit(new CommandLine(new MainCommand()).execute(args));
-    }
 
     /**
      * Program called without any commands.
@@ -78,6 +66,15 @@ public class MainCommand implements Callable<Integer> {
         int exitCode = 0;
         if (System.getenv().containsKey("CERTBOT_DOMAIN")) {
             exitCode = spec.commandLine().getSubcommands().get("certbot").execute();
+        } else {
+            var err = spec.commandLine().getErr();
+            err.println("*** No command given and the program is NOT running as a Certbot authentication hook");
+            spec.commandLine().usage(err);
+
+            var configureCmd = ((ConfigureCommand) spec.commandLine().getSubcommands().get("configure").getCommand());
+            configureCmd.init();
+            configureCmd.show(err);
+            exitCode = 2;
         }
         return exitCode;
     }

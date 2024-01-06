@@ -39,8 +39,9 @@ import static picocli.CommandLine.Model.*;
 @Command(
         name = "certbot",
         description
-        = "Handles the Certbot hooks by getting arguments from the environment variables.\n"
-        + "See: https://eff-certbot.readthedocs.io/en/stable/using.html#hooks\n"
+        = "Handles the Certbot authentication hooks by using arguments from the CERTBOT_* environment variables.\n"
+        + "See: https://eff-certbot.readthedocs.io/en/stable/using.html#hooks \n"
+        + "Also: Please use the bash script quickdns-certbot-auth to avoid running as root.\n"
         + "NOTE: The certbot command is automatically issued if the environment variable CERTBOT_DOMAIN is set."
 )
 public class CertbotCommand implements Callable<Integer> {
@@ -57,6 +58,7 @@ public class CertbotCommand implements Callable<Integer> {
         int exitCode = 0;
         var zones = ctx.login();
         try {
+            // Execute the hook
             exitCode = CertbotHook.fromEnvironment(zones).call();
         } finally {
             ctx.logout();

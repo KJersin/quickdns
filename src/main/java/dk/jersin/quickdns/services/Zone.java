@@ -123,7 +123,6 @@ public class Zone implements DomFunction<Zone> {
     }
 
     private String extractInitArg(String onloadArg) {
-        logger.info(onloadArg);
         var matcher = initArgPattern.matcher(onloadArg);
         return matcher.matches() ? matcher.group(1) : null;
 

@@ -1,0 +1,34 @@
+#!/usr/bin/bash
+
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+JAR_FILE=$SCRIPT_DIR/target/quick-dns-1.0-SNAPSHOT.jar
+
+set -e
+usage() {
+    [ -n "$1" ] && echo -e "$1" >&2
+    cat << EOF >&2
+Usage: $0 [options]
+Options:
+  -l USER   Run the quickdns hook app as this user
+  -h        Show this help
+
+NOTE: This script will enforce the principle of least privilege.
+      Ie. Certbot has to be run as root, but that is NOT required by the quickdns auth hook.
+EOF
+}
+while getopts "l:" opt ; do
+    case "${opt}" in
+        l) SU_USER=${OPTARG} ;;
+        *) usage "*** Unknown argument $OPTARG" ; exit 1 ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [ "$EUID" -eq 0 ]; then
+    [ -n "$SU_USER" ] && usage "*** Won't run as root. Please specify a user (-l argument)" && exit 1
+    su -p -c "java -jar \"$JAR_FILE\" \"$SU_USER\""
+else
+    java -jar "$JAR_FILE"
+fi
+
+exit 0

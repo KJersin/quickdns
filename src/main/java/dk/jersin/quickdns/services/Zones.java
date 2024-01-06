@@ -52,6 +52,12 @@ public class Zones implements DomFunction<Zones> {
         this.conn = conn;
     }
 
+    /**
+     * Load the zones from the html page.
+     * 
+     * @param doc
+     * @return 
+     */
     @Override
     public Zones load(Document doc) {
         baseUri = URI.create(doc.baseUri());
@@ -69,13 +75,21 @@ public class Zones implements DomFunction<Zones> {
                                 row.child(4).text().replace(' ', 'T')
                         )
                 );
-                logger.info(() -> zone.toString());
                 zones.put(aElm.text(), zone);
             }
         });
         return this;
     }
 
+    /**
+     * Get zone by domain name.
+     * The zone data (zone records) are {@link Zone::load}ed from quick dns.
+     * 
+     * @param domain
+     * @return
+     * @throws IOException
+     * @throws InterruptedException 
+     */
     public Zone zoneFor(String domain) throws IOException, InterruptedException {
         if (zones.containsKey(domain)) {
             var zoneElm = zones.get(domain);
