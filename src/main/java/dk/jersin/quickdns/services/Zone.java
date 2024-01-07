@@ -1,18 +1,21 @@
-/*
- * The MIT License
- *
- * Copyright 2023 kje.
- *
+package dk.jersin.quickdns.services;
+
+/*-
+ * #%L
+ * Quicdns - CLI to the DNS service including Certbot authentication hook functionality
+ * %%
+ * Copyright (C) 2023 - 2024 Kim Jersin
+ * %%
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- *
+ * 
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,34 +23,26 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
+ * #L%
  */
-package dk.jersin.quickdns.services;
 
 import java.time.LocalDateTime;
 import java.util.logging.Logger;
 import org.jsoup.nodes.Document;
 import dk.jersin.quickdns.DomFunction;
-import org.jsoup.nodes.Element;
 import dk.jersin.dns.ZoneRecord;
 import dk.jersin.quickdns.Connection;
 import dk.jersin.quickdns.ConnectionClient;
 import java.io.Closeable;
 import java.io.IOException;
-import java.net.CookieManager;
-import java.net.HttpCookie;
-import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.net.http.HttpClient;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
 import java.util.regex.Pattern;
-import javax.net.ssl.HttpsURLConnection;
 
 import static dk.jersin.letsencrypt.CertbotHook.ACME_CHALLENGE;
 import static java.util.Collections.unmodifiableList;

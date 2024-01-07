@@ -1,15 +1,24 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>dk.jersin.quickdns</groupId>
-    <artifactId>quick-dns</artifactId>
+    <groupId>dk.jersin</groupId>
+    <artifactId>quickdns</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
+    
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <exec.mainClass>dk.jersin.quickdns.QuickDns</exec.mainClass>
+        <exec.mainClass>dk.jersin.quickdns.MainCommand</exec.mainClass>
+
+        <!-- License stuff -->
+        <license.projectName>Quicdns - CLI to the DNS service including Certbot authentication hook functionality</license.projectName>
+        <license.licenseName>mit</license.licenseName>
+        <license.inceptionYear>2023</license.inceptionYear>
+        <license.organizationName>Kim Jersin</license.organizationName>
+        <license.emptyLineAfterHeader>true</license.emptyLineAfterHeader>
+        <license.copyrightOwners>Kim Jersin</license.copyrightOwners>
     </properties>
     
     <licenses>
@@ -34,19 +43,34 @@
                 <artifactId>jsoup</artifactId>
                 <version>1.17.1</version>
             </dependency>
-    
             <dependency>
                 <groupId>info.picocli</groupId>
                 <artifactId>picocli</artifactId>
                 <version>4.7.5</version>
             </dependency> 
-            
             <dependency>
                 <groupId>com.google.code.gson</groupId>
                 <artifactId>gson</artifactId>
                 <version>2.10.1</version>
             </dependency>
-            
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-api</artifactId>
+                <version>5.6.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-params</artifactId>
+                <version>5.6.0</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter-engine</artifactId>
+                <version>5.6.0</version>
+                <scope>test</scope>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -68,19 +92,16 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-api</artifactId>
-            <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-            <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
-            <version>5.6.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>   
@@ -197,7 +218,6 @@
                 <artifactId>license-maven-plugin</artifactId>
                 <configuration>
                     <verbose>true</verbose>
-                    <licenseName>mit</licenseName>
                     <roots>
                         <root>src/main/java</root>
                         <root>src/test/java</root>
@@ -228,7 +248,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>dk.jersin.quickdns.MainCommand</mainClass>
+                                    <mainClass>${exec.mainClass}</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -237,4 +257,40 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>jcom</id>
+            <name>JCom Public Repository</name>
+            <url>https://repo.jersin.dk/repository/maven-public/</url>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
+    
+    <distributionManagement>
+        <repository>
+            <id>jcom</id>
+            <name>JCom release repository</name>
+            <url>https://repo.jersin.dk/repository/maven-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>jcom</id>
+            <name>JCom snapshot repository</name>
+            <url>https://repo.jersin.dk/repository/maven-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <!-- 
+        mvn license:update-project-license license:update-file-header 
+        mvn clean release:prepare -DautoVersionSubmodules=true -Darguments='-Dmaven.test.skip=true'
+        mvn release:perform -Darguments='-Dmaven.test.skip=true'
+    -->
+    <scm>
+        <connection>scm:git:${user.name}@dev.jersin.dk:322/~/prv/quick-dns.git</connection>
+        <developerConnection>scm:git:${user.name}@dev.jersin.dk:322/~/prv/quick-dns.git</developerConnection>
+        <url>https://bitbucket.org/jersin-team/poolscore</url>
+        <tag>HEAD</tag>
+    </scm>
 </project>
