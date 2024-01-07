@@ -1,0 +1,4 @@
+#!/usr/bin/bash
+set -e
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+java $JAVA_OPTS -jar $SCRIPT_DIR/quickdns.jar "$@"
