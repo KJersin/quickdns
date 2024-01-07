@@ -52,7 +52,7 @@ __Debian/Ubuntu/Raspberry PI OS, etc.__:
 
 ### [Quickdns](https://github.com/KJersin/quickdns)
 
-`wget -q -O - https://repo.jersin.dk/repository/maven-public/dk/jersin/quickdns/1.1/quickdns-1.1-dist.tar.gz | sudo tar --no-same-owner -zxvf - -C /usr/bin`
+`wget -q -O - https://repo.jersin.dk/repository/maven-public/dk/jersin/quickdns/1.2/quickdns-1.2-dist.tar.gz | sudo tar --no-same-owner -zxvf - -C /usr/bin`
 
 ## Usage
 
@@ -159,10 +159,10 @@ As for as I understand Certbot is fully supported on these platforms as well. An
 
 If you're using one of these two platforms and are interrested in using the quickdns application then please give me a shout. I do have at Windows installation (for gaming) and a Mac M1 laptop for the road.
 
-Or simply try it out. The quickdns application itself consists of a single runnable (uber) jar (dependencies are sharded in). So simply download the jar file [quickdns-1.1.jar](https://repo.jersin.dk/repository/maven-public/dk/jersin/quickdns/1.1/quickdns-1.1.jar) and run it.
+Or simply try it out. The quickdns application itself consists of a single runnable (uber) jar (dependencies are sharded in). So simply download the jar file [quickdns-1.2.jar](https://repo.jersin.dk/repository/maven-public/dk/jersin/quickdns/1.2/quickdns-1.2.jar) and run it.
 
 ```
-java -jar quickdns-1.1.jar
+java -jar quickdns-1.2.jar
 ```
 
 ## Final words
