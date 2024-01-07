@@ -290,7 +290,7 @@
     <scm>
         <connection>scm:git:${user.name}@dev.jersin.dk:322/~/prv/quick-dns.git</connection>
         <developerConnection>scm:git:${user.name}@dev.jersin.dk:322/~/prv/quick-dns.git</developerConnection>
-        <url>https://bitbucket.org/jersin-team/poolscore</url>
+        <!--url>https://bitbucket.org/jersin-team/poolscore</url-->
         <tag>HEAD</tag>
     </scm>
 </project>
