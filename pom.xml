@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>dk.jersin</groupId>
     <artifactId>quickdns</artifactId>
-    <version>1.2</version>
+    <version>1.3-SNAPSHOT</version>
     <packaging>jar</packaging>
     
     <properties>
@@ -336,6 +336,6 @@
         <connection>scm:git:ssh://${user.name}@dev.jersin.dk:322/~/prv/quick-dns.git</connection>
         <developerConnection>scm:git:ssh://${user.name}@dev.jersin.dk:322/~/prv/quick-dns.git</developerConnection>
         <!--url>https://bitbucket.org/jersin-team/poolscore</url-->
-        <tag>quickdns-1.2</tag>
+        <tag>HEAD</tag>
     </scm>
 </project>
