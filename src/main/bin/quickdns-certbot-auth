@@ -25,8 +25,11 @@ done
 shift $((OPTIND-1))
 
 if [ "$EUID" -eq 0 ]; then
-    [ -n "$SU_USER" ] && usage "*** Won't run as root. Please specify a user (-l argument)" && exit 1
-    su -p -c "java \$JAVA_OPTS -jar \"$JAR_FILE\" \"$SU_USER\""
+    if [ -z "$SU_USER" ]; then
+        usage "*** Won't run as root. Please specify a user to run as (-l argument)"
+        exit 1
+    fi
+    su -p -c "java -jar \"$JAR_FILE\" certbot" "$SU_USER"
 else
-    java $JAVA_OPTS -jar "$JAR_FILE"
+    java -jar "$JAR_FILE" certbot
 fi
