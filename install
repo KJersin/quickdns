@@ -1,0 +1,8 @@
+#!/usr/bin/bash
+set -e
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+mvn -f "$SCRIPT_DIR" -Dmaven.test.skip=true clean package
+
+INSTALL_DIR=/usr/bin
+echo "Installing to: $INSTALL_DIR"
+sudo tar --no-same-owner -zxvf "$SCRIPT_DIR"/target/*-*-dist.tar.gz -C "$INSTALL_DIR"
